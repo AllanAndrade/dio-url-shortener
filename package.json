@@ -4,7 +4,7 @@
   "description": "Projeto para o Bootcamp \"Spread Fullstack Developer\" módulo \"NodeJs\"",
   "main": "src/index.ts",
   "scripts": {
-    "dev": "concurrently \"npx tsc --watch\" \"npx nodemon dist/index.js\""
+    "start": "concurrently \"npx tsc --watch\" \"npx nodemon dist/index.js\" \"docker-compose -f docker/docker-compose.yml up\""
   },
   "author": "Allan Andrade",
   "license": "ISC",
