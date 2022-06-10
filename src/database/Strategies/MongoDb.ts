@@ -1,42 +1,55 @@
 import DatabaseStrategy from '../DatabaseStrategy';
 import cfg_conexao_type from '../cfg_conexao_type';
-
-const MongoClient = require('mongodb').MongoClient;
+import cfg from '../../config';
+const mongo = require('mongodb');
 
 class MongoDb implements DatabaseStrategy {
-  private conexao;
-  /**
-   * Estabelece a conexão com o SGBD
-   * @param cfg_conexao é um objeto: {
-    sgbd: 'MongoDb',                   <---- Sistema Gerenciador de Banco de Dados (MongoDb, MySQL, MsSql)
-    host: '127.0.0.1',                 <---- Host do banco de dados
-    port: '27017',                     <---- Porta do banco de dados
-    user: 'admin',                     <---- Usuário do banco de dados
-    pass: '1234',                      <---- Senha do usuário no banco de dados
-    base: 'nome_do_schema_ou_colecao'  <---- Nome do Schema ou Coleção
-  }
-   */
-  private async getConexao(cfg_conexao: cfg_conexao_type): Promise<any> {
+  // Estabelece a conexão com o SGBD
+  async getDb(cfg_conexao: cfg_conexao_type) {
     const mongourl = `mongodb://${cfg_conexao.user}:${cfg_conexao.pass}@${cfg_conexao.host}:${cfg_conexao.port}/${cfg_conexao.base}`;
-    let conexao = await MongoClient.connect(mongourl, {
+
+    let conexao = await mongo.MongoClient.connect(mongourl, {
       useNewUrlParser: true
     }).catch((err: any) => {
       console.log('ERRO');
       console.log(err);
       throw new Error('Erro ao tentar conexão com o banco de dados!');
     });
+    let db = conexao.db(cfg_conexao.base);
+    return db;
+  }
 
-    if (!conexao) {
-      return false;
+  // Busca e retorna um registro a partir do ID
+  async findOneById(source: string, id: string) {
+    try {
+      const db = await this.getDb(cfg.database);
+      let collection = db.collection(source);
+
+      let res = await collection
+        .find({ _id: mongo.ObjectId(id) }, { _id: 1 })
+        .toArray();
+
+      return res[0];
+    } catch (err) {
+      throw new Error(
+        'Erro ao tentar localizar um registro no banco de dados.'
+      );
     }
-    return conexao;
   }
 
-  constructor(cfg_conexao: cfg_conexao_type) {
-    this.conexao = this.getConexao(cfg_conexao);
+  // Insere um novo registro em uma coleção e retorna o ID do mesmo.
+  async insertOne(colecao: string, dados: any) {
+    try {
+      const db = await this.getDb(cfg.database);
+      let collection = db.collection(colecao);
+      let res = await collection.insertOne(dados);
+
+      return res.insertedId;
+    } catch (err) {
+      throw new Error('Erro ao tentar inserir um registro no banco de dados.');
+    }
   }
-
-  findOneById(source: string, id: any): any {}
-
-  insertOne(source: string, dados: []): any {}
 }
+
+let obj_mongo = new MongoDb();
+export default obj_mongo;

@@ -9,10 +9,12 @@ api.use(express.json());
  * Configura Rotas
  */
 // Encurta a URL
-import shortener_url from './domain/shortener_url';
-api.post('/shortener', shortener_url);
+import url_shortener from './domain/url_shortener';
+api.post('/shortener', url_shortener);
 
 // Redireciona para a URL original
+import url_redirect from './domain/url_redirect';
+api.get('/:id', url_redirect);
 
 /**
  * Inicia o Express

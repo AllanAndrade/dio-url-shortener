@@ -1,24 +1,21 @@
-import DatabaseStrategy from './DatabaseStrategy';
-import cfg_conexao_type from './cfg_conexao_type';
-
 /**
- * Contexto para a estratégia de acesso a banco de dados
+ * Contexto para a estratégia de acesso a banco de dados,
+ * a qual é carregada a depender do parâmetro definido no
+ * arquivo de configuração: cfg.database.sgbd
  */
-export default class Database {
-  private estrategia_usada;
+import cfg from '../config';
+const estrategia_usada = require(`./Strategies/${cfg.database.sgbd}`).default;
+import DatabaseStrategy from './DatabaseStrategy';
 
-  constructor(cfg_conexao: cfg_conexao_type) {
-    let Estrategia = require('./Strategies/' +
-      cfg_conexao.sgbd) as DatabaseStrategy;
-    this.estrategia_usada = new Estrategia(cfg_conexao);
-    // this.conexao = this.estrategia_usada.conexao(cfg_conexao);
+class Database implements DatabaseStrategy {
+  async insertOne(source: string, dados: object): Promise<any> {
+    return await estrategia_usada.insertOne(source, dados);
   }
 
-  public insertOne(source: string, dados: []) {
-    this.estrategia_usada.insertOne(source, dados);
-  }
-
-  public findOneById(source: string, id: any) {
-    this.estrategia_usada.findOneById(source, id);
+  async findOneById(source: string, id: string): Promise<any> {
+    return await estrategia_usada.findOneById(source, id);
   }
 }
+
+let obj_db = new Database();
+export default obj_db;

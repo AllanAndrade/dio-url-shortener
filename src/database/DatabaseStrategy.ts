@@ -1,6 +1,7 @@
-import cfg_conexao_type from './cfg_conexao_type';
+/**
+ * Interface que define a estrutura obrigatória para as Estratégias
+ */
 export default interface DatabaseStrategy {
-  // constructor: (cfg_conexao: cfg_conexao_type) => {};
-  findOneById: (source: string, id: any) => {};
-  insertOne: (source: string, dados: []) => {};
+  findOneById(source: string, id: string): Promise<any>;
+  insertOne(source: string, dados: object): Promise<any>;
 }
