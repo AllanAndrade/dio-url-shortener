@@ -35,5 +35,5 @@ export default async function shortener_url(
     url_original: req.body.url_original,
     url_reduzida: cfg.base_url + id
   };
-  res.status(200).send(resultado);
+  res.status(201).send(resultado);
 }
